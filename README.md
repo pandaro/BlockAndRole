@@ -1,2 +1,2 @@
 # BlockAndRole
-Nomad role play game for minetest
+Role play game for minetest
