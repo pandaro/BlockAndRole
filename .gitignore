@@ -1,0 +1,23 @@
+# Temporary files
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build artifacts
+*.o
+*.so
+*.dll
+*.dylib
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-*
+
+# Minetest specific
+/worlds/
+/mods/*/locale/*.tr
+/client/
+/cache/
+debug.txt
