@@ -74,7 +74,6 @@ abilityfw.register_ability("teleport", {
 abilityfw.register_ability("swift_feet", {
 	name = "Swift Feet",
 	type = "passive",
-	on_use = nil  -- Passive abilities don't have on_use
 })
 
 -- Example Passive Ability: Mana Regeneration

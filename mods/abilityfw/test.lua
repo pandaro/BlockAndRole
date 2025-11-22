@@ -36,52 +36,57 @@ minetest = {
 	end
 }
 
+-- Factory function to create mock players
+local function create_mock_player(name)
+	return {
+		_name = name,
+		_hp = 15,
+		_pos = {x=0, y=0, z=0},
+		_meta = {},
+		
+		is_player = function(self)
+			return true
+		end,
+		
+		get_player_name = function(self)
+			return self._name
+		end,
+		
+		get_hp = function(self)
+			return self._hp
+		end,
+		
+		set_hp = function(self, hp)
+			self._hp = hp
+		end,
+		
+		get_pos = function(self)
+			return self._pos
+		end,
+		
+		set_pos = function(self, pos)
+			self._pos = pos
+		end,
+		
+		get_look_dir = function(self)
+			return {x=1, y=0, z=0}
+		end,
+		
+		get_meta = function(self)
+			return {
+				get_string = function(_, key)
+					return self._meta[key] or ""
+				end,
+				set_string = function(_, key, value)
+					self._meta[key] = value
+				end
+			}
+		end
+	}
+end
+
 -- Mock player object
-local mock_player = {
-	_name = "test_player",
-	_hp = 15,
-	_pos = {x=0, y=0, z=0},
-	_meta = {},
-	
-	is_player = function(self)
-		return true
-	end,
-	
-	get_player_name = function(self)
-		return self._name
-	end,
-	
-	get_hp = function(self)
-		return self._hp
-	end,
-	
-	set_hp = function(self, hp)
-		self._hp = hp
-	end,
-	
-	get_pos = function(self)
-		return self._pos
-	end,
-	
-	set_pos = function(self, pos)
-		self._pos = pos
-	end,
-	
-	get_look_dir = function(self)
-		return {x=1, y=0, z=0}
-	end,
-	
-	get_meta = function(self)
-		return {
-			get_string = function(_, key)
-				return self._meta[key] or ""
-			end,
-			set_string = function(_, key, value)
-				self._meta[key] = value
-			end
-		}
-	end
-}
+local mock_player = create_mock_player("test_player")
 
 -- Load the ability framework
 dofile("api.lua")
@@ -198,51 +203,7 @@ print("Use ability: " .. (success and "PASS" or "FAIL"))
 print("Return message: " .. (message or "N/A"))
 
 -- Now test with cooldown ability (use a fresh player to avoid cooldown from Test 4)
-local cooldown_test_player = {
-	_name = "cooldown_test",
-	_hp = 15,
-	_pos = {x=0, y=0, z=0},
-	_meta = {},
-	
-	is_player = function(self)
-		return true
-	end,
-	
-	get_player_name = function(self)
-		return self._name
-	end,
-	
-	get_hp = function(self)
-		return self._hp
-	end,
-	
-	set_hp = function(self, hp)
-		self._hp = hp
-	end,
-	
-	get_pos = function(self)
-		return self._pos
-	end,
-	
-	set_pos = function(self, pos)
-		self._pos = pos
-	end,
-	
-	get_look_dir = function(self)
-		return {x=1, y=0, z=0}
-	end,
-	
-	get_meta = function(self)
-		return {
-			get_string = function(_, key)
-				return self._meta[key] or ""
-			end,
-			set_string = function(_, key, value)
-				self._meta[key] = value
-			end
-		}
-	end
-}
+local cooldown_test_player = create_mock_player("cooldown_test")
 abilityfw.grant_ability("cooldown_test", "test_fireball")
 success, message = abilityfw.use_ability(cooldown_test_player, "test_fireball")
 print("Use ability with cooldown: " .. (success and "PASS" or "FAIL"))
@@ -260,52 +221,8 @@ print("Can't use ability not owned: " .. (not success and "PASS" or "FAIL"))
 print("\n--- Test 6: Persistence ---")
 
 -- Use a fresh player name for this test
-local persist_player_name = "persist_test"
-local persist_player = {
-	_name = persist_player_name,
-	_hp = 15,
-	_pos = {x=0, y=0, z=0},
-	_meta = {},
-	
-	is_player = function(self)
-		return true
-	end,
-	
-	get_player_name = function(self)
-		return self._name
-	end,
-	
-	get_hp = function(self)
-		return self._hp
-	end,
-	
-	set_hp = function(self, hp)
-		self._hp = hp
-	end,
-	
-	get_pos = function(self)
-		return self._pos
-	end,
-	
-	set_pos = function(self, pos)
-		self._pos = pos
-	end,
-	
-	get_look_dir = function(self)
-		return {x=1, y=0, z=0}
-	end,
-	
-	get_meta = function(self)
-		return {
-			get_string = function(_, key)
-				return self._meta[key] or ""
-			end,
-			set_string = function(_, key, value)
-				self._meta[key] = value
-			end
-		}
-	end
-}
+local persist_player = create_mock_player("persist_test")
+local persist_player_name = persist_player:get_player_name()
 
 abilityfw.grant_ability(persist_player_name, "test_fireball")
 abilityfw.grant_ability(persist_player_name, "test_passive")

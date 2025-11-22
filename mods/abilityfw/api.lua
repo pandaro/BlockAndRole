@@ -169,7 +169,7 @@ function abilityfw.use_ability(player, ability_name)
 	
 	if not success then
 		minetest.log("error", "[abilityfw] Error using ability '" .. ability_name .. "': " .. tostring(result))
-		return false, "Ability execution failed"
+		return false, "Ability execution failed: " .. tostring(result)
 	end
 	
 	-- Set cooldown
