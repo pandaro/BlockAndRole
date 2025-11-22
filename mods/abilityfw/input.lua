@@ -8,7 +8,7 @@ minetest.register_on_mods_loaded(function()
 end)
 
 -- Handle aux1 (special key) to use selected ability
-minetest.register_on_playerReceiveFields(function(player, formname, fields)
+minetest.register_on_player_receive_fields(function(player, formname, fields)
 	if fields.key_aux1 then
 		local player_name = player:get_player_name()
 		local ability_name = abilityfw.get_selected_ability(player_name)
