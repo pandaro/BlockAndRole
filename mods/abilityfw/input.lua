@@ -86,6 +86,9 @@ minetest.register_chatcommand("useselected", {
 })
 
 -- Register right-click to use ability
+-- NOTE: Commented out because minetest.register_on_item_use does not exist in Minetest API
+-- To implement this feature, you would need to register a specific item with on_use callback
+--[[
 minetest.register_on_item_use(function(itemstack, user, pointed_thing)
 	-- Check if player is right-clicking without an item or with specific item
 	-- This is a placeholder - in real implementation, you might want a special item
@@ -101,6 +104,7 @@ minetest.register_on_item_use(function(itemstack, user, pointed_thing)
 		return itemstack
 	end
 end)
+--]]
 
 -- Override use_ability to integrate mana cost checking
 local original_use_ability = abilityfw.use_ability
