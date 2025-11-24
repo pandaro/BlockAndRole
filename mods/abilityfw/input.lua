@@ -87,7 +87,10 @@ minetest.register_chatcommand("useselected", {
 
 -- Register right-click to use ability
 -- NOTE: Commented out because minetest.register_on_item_use does not exist in Minetest API
--- To implement this feature, you would need to register a specific item with on_use callback
+-- To implement this feature, consider these alternatives:
+--   1. Register a specific tool/item with an on_use or on_secondary_use callback
+--   2. Use minetest.register_on_punchnode for node interaction
+--   3. Override default:hand item definition to add on_use behavior
 --[[
 minetest.register_on_item_use(function(itemstack, user, pointed_thing)
 	-- Check if player is right-clicking without an item or with specific item
