@@ -1,6 +1,27 @@
 rpg_tool={}
 local timer = 0
-	
+local function deepcopy(orig, seen)
+    if type(orig) ~= "table" then
+        return orig
+    end
+    seen = seen or {}
+    if seen[orig] then
+        return seen[orig]
+    end
+
+    local copy = {}
+    seen[orig] = copy
+    for k, v in pairs(orig) do
+        copy[deepcopy(k, seen)] = deepcopy(v, seen)
+    end
+
+    local mt = getmetatable(orig)
+    if mt then
+        setmetatable(copy, deepcopy(mt, seen))
+    end
+
+    return copy
+end
 rpg_tool.tool_set = function(self,stack,player,external)
 print(dump(stack:to_table()))
 	print(dump(player:get_player_name()))
@@ -15,6 +36,11 @@ print(dump(stack:to_table()))
 	local new_time_3 = caps.groupcaps.cracky.times[3] * 1 - (player:get_attribute('tool')/10)
 	local new_time_2 = caps.groupcaps.cracky.times[2] * 1 - (player:get_attribute('tool')/10)
 	local new_damage = caps.damage_groups.fleshy * 1 + (player:get_attribute('sword')/10)
+		print('safuoier')
+	
+	local newcap = deepcopy(caps,player)
+	print(dump(newcap))
+	print('safsadf')
 	meta:set_tool_capabilities({
  		max_drop_level=0,
  		groupcaps={
@@ -25,6 +51,50 @@ print(dump(stack:to_table()))
 		return stack
 	
 end
+
+rpg_tool.tool_set2 = function(self,stack,player,external)
+	print(dump(stack:to_table()))
+	print(dump(player:get_player_name()))
+	--local stack = player:get_wielded_item()
+	local rpgTool = stack:get_definition()._rpg
+	if not rpgTool then return end
+ 	local meta = stack:get_meta()
+	local caps = stack:get_definition().tool_capabilities
+	meta:set_int('palette_index',1)
+	meta:set_string('owner',player:get_player_name())
+	for name, value in pairs(caps) do
+		if player:get_attribute(name) then
+			caps[name] = caps[name] * player:get_attribute(name)
+		end
+		if name == 'groupcaps' then
+			for cap,t in pairs(caps.groupcaps) do
+				local player_cap = player:get_attribute(cap)
+				if player_cap then 
+					for k,v in pairs(cap) do
+						v = v * payer_cap
+					end
+				end
+			end
+		end
+		if name == 'damage_groups' then
+			for cap,t in pairs(caps.damage_groups) do
+				local player_cap = player:get_attribute(cap)
+				if player_cap then 
+					for k,v in pairs(cap) do
+						v = v * payer_cap
+					end
+				end
+			end
+		end
+	end
+
+
+	meta:set_tool_capabilities(caps)
+		return stack
+	
+end
+
+
 
 
 minetest.register_globalstep(function(dtime)
@@ -75,12 +145,12 @@ minetest.register_tool("rpg_tool:1", {
 
 	on_place = function(itemstack, placer, pointed_thing)
 		print('on_placestart')
-		rpg_tool:tool_set(itemstack,placer)
+		rpg_tool:tool_set2(itemstack,placer)
 		return itemstack
 	end,
 	on_secondary_use = function(itemstack, user, pointed_thing)
 		print('on_placestart')
-		rpg_tool:tool_set(itemstack,user)
+		rpg_tool:tool_set2(itemstack,user)
 		return itemstack
 	end,
 
@@ -92,3 +162,7 @@ minetest.register_tool("rpg_tool:1", {
 		damage_groups = {fleshy=2},
 	},
 })
+
+local rpg_tool_path = minetest.get_modpath("rpg_tool")
+
+dofile(rpg_tool_path.."/short_weapons.lua")

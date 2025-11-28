@@ -16,6 +16,7 @@ label[1,3;Pick]
 label[1,4;Sword]
 label[1,5;Tool]
 label[1,6;Durability]
+label[1,7;cut]
 
 label[0,1;CURRENT]
 
@@ -26,11 +27,13 @@ button[3,2.5;1,1;pick;+]
 button[3,3.5;1,1;sword;+]
 button[3,4.5;1,1;tool;+]
 button[3,5.5;1,1;durability;+]
+button[3,6.5;1,1;cut;+]
 
 background[0,3;1,1;aaa]
 background[0,4;1,1;aaa]
 background[0,5;1,1;aaa]
 background[0,6;1,1;aaa]
+background[0,7;1,1;aaa]
 ]]	
 
 minetest.register_on_newplayer(function(obj)
@@ -42,6 +45,16 @@ minetest.register_on_newplayer(function(obj)
 print('join')
 end)
 
+minetest.register_on_joinplayer(function(obj)
+	print(dump(obj))
+	for name, value in pairs( abilityfw.ability_list )do
+		if not obj:get_attribute(name) then
+			obj:set_attribute(name,value)
+		end	
+	end
+
+print('join')
+end)
 minetest.register_on_player_receive_fields(function(player, formname, fields)
 	
 	print('field received')
@@ -69,7 +82,8 @@ abilityfw.redraw = function(player)
 			'label[0,3;'..player:get_attribute('pick')..']'..
 			'label[0,4;'..player:get_attribute('sword')..']'..
 			'label[0,5;'..player:get_attribute('tool')..']'..
-			'label[0,6;'..player:get_attribute('durability')..']')
+			'label[0,6;'..player:get_attribute('durability')..']'..
+			'label[0,7;'..player:get_attribute('cut	')..']')
 end
 	
 minetest.register_node('abilityfw:table',{
