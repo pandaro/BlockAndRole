@@ -1,27 +1,45 @@
-local default_class = minetest.setting_get("classes_default_class")
+local default_class = core.setting_get("classes_default_class")
 if not default_class then
 	default_class = "human"
-	minetest.setting_set("classes_default_class", default_class)
+	core.setting_set("classes_default_class", default_class)
 end
-local has_skin_changer = minetest.get_modpath("player_textures") or minetest.get_modpath("skins")
-local has_3d_armor = minetest.get_modpath("3d_armor")
+local has_skin_changer = core.get_modpath("player_textures") or core.get_modpath("skins")
+local has_3d_armor = core.get_modpath("3d_armor")
 
 classes = {
-	class = {},
 	properties = {},
-	filename = minetest.get_worldpath().."/classes.mt",
 }
 
 classes.register_class = function(self, class, properties)
 	self.properties[class] = properties
 end
 
+-- Get player class from meta
+classes.get_class = function(self, player)
+	if not player then
+		return default_class
+	end
+	local class = player:get_meta():get_string('class')
+	if class == "" then
+		return default_class
+	end
+	return class
+end
+
+-- Set player class in meta
+classes.set_class = function(self, player, class)
+	if not player then
+		return false
+	end
+	player:get_meta():set_string('class', class)
+	return true
+end
+
 classes.update_player_visuals = function(self, player)
 	if not player then
 		return
 	end
-	local name = player:get_player_name()
-	local class = classes.class[name]
+	local class = classes:get_class(player)
 	local properties = classes.properties[class]
 	local mesh = ""
 	local texture = properties.texture
@@ -50,44 +68,24 @@ classes.update_player_visuals = function(self, player)
 	player:set_armor_groups(properties.armor_groups)
 end
 
-classes.load = function(self)
-	local input = io.open(self.filename, "r")
-	local data = nil
-	if input then
-		data = input:read('*all')
-	end
-	if data and data ~= "" then
-		lines = string.split(data, "\n")
-		for _, line in ipairs(lines) do
-			data = string.split(line, " ", 2)
-			self.class[data[1]] = data[2]
-		end
-		io.close(input)
-	end
-end
+core.register_privilege("class", "Player can change class.")
 
-classes.save = function(self)
-	local output = io.open(self.filename,'w')
-	for name, class in pairs(self.class) do
-		if name and class then
-			output:write(name.." "..class.."\n")
-		end
-	end
-	io.close(output)
-end
-
-minetest.register_privilege("class", "Player can change class.")
-
-minetest.register_chatcommand("class", {
+core.register_chatcommand("class", {
 	params = "[class]",
 	description = "Change or view character class.",
 	func = function(name, class)
+		local player = core.get_player_by_name(name)
+		if not player then
+			return false, "Player not found"
+		end
+		
 		if class == "" then
-			minetest.chat_send_player(name, "Current character class: "..classes.class[name])
+			local current_class = classes:get_class(player)
+			core.chat_send_player(name, "Current character class: "..current_class)
 			return
 		end
-		if not minetest.check_player_privs(name, {class=true}) then
-			minetest.chat_send_player(name, "Changing class requires the 'class' privilege!")
+		if not core.check_player_privs(name, {class=true}) then
+			core.chat_send_player(name, "Changing class requires the 'class' privilege!")
 			return
 		end
 		if not classes.properties[class] then
@@ -95,25 +93,27 @@ minetest.register_chatcommand("class", {
 			for k,_ in pairs(classes.properties) do
 				valid = valid.." "..k
 			end
-			minetest.chat_send_player(name, "Invalid class '"..class.."', choose from:"..valid)
+			core.chat_send_player(name, "Invalid class '"..class.."', choose from:"..valid)
 			return
 		end
-		if classes.class[name] == class then
+		local current_class = classes:get_class(player)
+		if current_class == class then
 			return
 		end
-		classes.class[name] = class
-		classes:save()
-		local player = minetest.get_player_by_name(name)
+		classes:set_class(player, class)
 		classes:update_player_visuals(player)
 	end,
 })
 
-minetest.register_on_joinplayer(function(player)
-	local name = player:get_player_name()
-	if not classes.class[name] then
-		classes.class[name] = default_class
+core.register_on_joinplayer(function(player)
+	if not player then
+		return
 	end
-	minetest.after(1, function(player)
+	local class = classes:get_class(player)
+	if class == default_class and player:get_meta():get_string('class') == "" then
+		classes:set_class(player, default_class)
+	end
+	core.after(1, function(player)
 		classes:update_player_visuals(player)
 	end, player)
 end)

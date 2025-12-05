@@ -38,5 +38,5 @@ classes:register_class("elf", {
 	charisma = 1,
 })
 
-classes:load()
+--classes:load()
 
