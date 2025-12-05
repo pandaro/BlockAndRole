@@ -27,8 +27,7 @@ local function ensure_defaults(ctx, player)
 
     -- Get player attributes from classes
     if player and player.get_player_name then
-        local name = player:get_player_name()
-        local class = classes and classes.class and classes.class[name]
+        local class = classes and classes.get_class and classes:get_class(player)
         local properties = classes and classes.properties and class and classes.properties[class]
         
         if properties then
@@ -59,11 +58,13 @@ local player_menu = flow.make_gui(function(player, ctx)
     ensure_defaults(ctx, player)
 
     -- Top header (empty or minimal)
-    local header = gui.Box{ h = 0.1, color = "#0000" }
+    local header = gui.VBox{
+        h = 0.1,
+    }
 
     -- Tab header: Info + Inventory
     local header_tabs = gui.HBox{
-        gui.Box{ w = 0.3, h = 1, color = "#0000" },
+        gui.VBox{ w = 0.3, h = 1 },
         gui.Tabheader{
             name = "_flow_ui_tab",
             items = { S("Info"), S("Inventory") },
@@ -74,7 +75,7 @@ local player_menu = flow.make_gui(function(player, ctx)
             w = 12,
             h = 1,
         },
-        gui.Box{ expand = true, color = "#0000" },
+        gui.VBox{ expand = true },
     }
 
     -- Centered player image placeholder (replace "character.png" with a real texture/model preview)
@@ -89,37 +90,37 @@ local player_menu = flow.make_gui(function(player, ctx)
     local image_frame = gui.Stack{
         gui.Box{ w = 5, h = 5, color = "#444444" },
         gui.VBox{
-            gui.Box{ h = 0.3, color = "#0000" },
+            gui.VBox{ h = 0.3 },
             gui.HBox{
-                gui.Box{ expand = true, color = "#0000" },
+                gui.HBox{ expand = true },
                 player_image,
-                gui.Box{ expand = true, color = "#0000" },
+                gui.HBox{ expand = true },
             },
-            gui.Box{ h = 0.3, color = "#0000" },
+            gui.VBox{ h = 0.3 },
         },
     }
 
     -- Info page content: data on left, image in center
     local info_content = gui.VBox{
-        gui.Box{ h = 0.2, color = "#0000" },
+        gui.VBox{ h = 0.2 },
         header,
-        gui.Box{ h = 0.3, color = "#0000" },
+        gui.VBox{ h = 0.3 },
         gui.HBox{
-            gui.Box{ w = 0.5, color = "#0000" },
+            gui.HBox{ w = 0.5 },
             gui.VBox{
                 gui.Label{ label = S("Name: ") .. tostring(ctx.form.player_name) },
                 gui.Label{ label = S("Race: ") .. tostring(ctx.form.race) },
                 gui.Label{ label = S("XP: ") .. tostring(ctx.form.xp) .. " / " .. tostring(ctx.form.xp_max) },
                 gui.Label{ label = S("HP: ") .. tostring(ctx.form.hp) .. " / " .. tostring(ctx.form.hp_max) },
-                gui.Box{ h = 0.2, color = "#0000" },
+                gui.VBox{ h = 0.2 },
                 gui.Label{ label = S("Strenght: ") .. tostring(ctx.form.strenght) },
                 gui.Label{ label = S("Agility: ") .. tostring(ctx.form.agility) },
                 gui.Label{ label = S("Constitution: ") .. tostring(ctx.form.constitution) },
                 gui.Label{ label = S("Charisma: ") .. tostring(ctx.form.charisma) },
             },
-            gui.Box{ w = 1, color = "#0000" },
+            gui.HBox{ w = 1 },
             image_frame,
-            gui.Box{ expand = true, color = "#0000" },
+            gui.HBox{ expand = true },
         },
     }
 
@@ -139,17 +140,17 @@ local player_menu = flow.make_gui(function(player, ctx)
     }
 
     local inventory_area = gui.VBox{
-        gui.Box{ h = 0.2, color = "#0000" },
+        gui.VBox{ h = 0.2 },
         inv_grid,
-        gui.Box{ h = 0.15, color = "#0000" },
+        gui.VBox{ h = 0.15 },
         hotbar,
     }
 
     local content_tab1 = info_content
     local content_tab2 = gui.HBox{
-        gui.Box{ expand = true, color = "#0000" },
+        gui.HBox{ expand = true },
         inventory_area,
-        gui.Box{ expand = true, color = "#0000" },
+        gui.HBox{ expand = true },
     }
 
     local content = (ctx.form._flow_ui_tab == 1) and content_tab1 or content_tab2
@@ -158,10 +159,10 @@ local player_menu = flow.make_gui(function(player, ctx)
         min_w = 14,
         min_h = 10,
 
-        gui.Box{ h = 0.2, color = "#0000" },
+        gui.VBox{ h = 0.2 },
 
         header_tabs,
-        gui.Box{ h = 0.12, color = "#cccccc" },
+        gui.Box{ h = 0.12, w = 14, color = "#cccccc" },
 
         content,
     }
