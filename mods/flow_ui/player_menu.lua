@@ -24,6 +24,30 @@ local function ensure_defaults(ctx, player)
     if ctx.form.xp_max == nil then ctx.form.xp_max = 100 end
 
     if ctx.form.race == nil then ctx.form.race = S("Dwarf") end
+
+    -- Get player attributes from classes
+    if player and player.get_player_name then
+        local name = player:get_player_name()
+        local class = classes and classes.class and classes.class[name]
+        local properties = classes and classes.properties and class and classes.properties[class]
+        
+        if properties then
+            ctx.form.agility = properties.agility or 1
+            ctx.form.strenght = properties.strenght or 1
+            ctx.form.constitution = properties.constitution or 1
+            ctx.form.charisma = properties.charisma or 1
+        else
+            ctx.form.agility = ctx.form.agility or 1
+            ctx.form.strenght = ctx.form.strenght or 1
+            ctx.form.constitution = ctx.form.constitution or 1
+            ctx.form.charisma = ctx.form.charisma or 1
+        end
+    else
+        ctx.form.agility = ctx.form.agility or 1
+        ctx.form.strenght = ctx.form.strenght or 1
+        ctx.form.constitution = ctx.form.constitution or 1
+        ctx.form.charisma = ctx.form.charisma or 1
+    end
 end
 
 local player_menu = flow.make_gui(function(player, ctx)
@@ -34,13 +58,8 @@ local player_menu = flow.make_gui(function(player, ctx)
     -- ensure info defaults
     ensure_defaults(ctx, player)
 
-    -- Top header row with player summary
-    local header = gui.HBox{
-        gui.Label{ label = S("Player: ") .. tostring(ctx.form.player_name), min_w = 6 },
-        gui.Label{ label = S("HP: ") .. tostring(ctx.form.hp) .. " / " .. tostring(ctx.form.hp_max), min_w = 6 },
-        gui.Label{ label = S("XP: ") .. tostring(ctx.form.xp) .. " / " .. tostring(ctx.form.xp_max), min_w = 6 },
-        gui.Label{ label = S("Race: ") .. tostring(ctx.form.race), min_w = 6 },
-    }
+    -- Top header (empty or minimal)
+    local header = gui.Box{ h = 0.1, color = "#0000" }
 
     -- Tab header: Info + Inventory
     local header_tabs = gui.HBox{
@@ -80,25 +99,26 @@ local player_menu = flow.make_gui(function(player, ctx)
         },
     }
 
-    -- Info page content: header, centered image, and summary labels
+    -- Info page content: data on left, image in center
     local info_content = gui.VBox{
         gui.Box{ h = 0.2, color = "#0000" },
         header,
         gui.Box{ h = 0.3, color = "#0000" },
         gui.HBox{
-            gui.Box{ expand = true, color = "#0000" },
-            image_frame,
-            gui.Box{ expand = true, color = "#0000" },
-        },
-        gui.Box{ h = 0.3, color = "#0000" },
-        gui.HBox{
-            gui.Box{ expand = true, color = "#0000" },
+            gui.Box{ w = 0.5, color = "#0000" },
             gui.VBox{
                 gui.Label{ label = S("Name: ") .. tostring(ctx.form.player_name) },
-                gui.Label{ label = S("HP: ") .. tostring(ctx.form.hp) .. " / " .. tostring(ctx.form.hp_max) },
-                gui.Label{ label = S("XP: ") .. tostring(ctx.form.xp) .. " / " .. tostring(ctx.form.xp_max) },
                 gui.Label{ label = S("Race: ") .. tostring(ctx.form.race) },
+                gui.Label{ label = S("XP: ") .. tostring(ctx.form.xp) .. " / " .. tostring(ctx.form.xp_max) },
+                gui.Label{ label = S("HP: ") .. tostring(ctx.form.hp) .. " / " .. tostring(ctx.form.hp_max) },
+                gui.Box{ h = 0.2, color = "#0000" },
+                gui.Label{ label = S("Strenght: ") .. tostring(ctx.form.strenght) },
+                gui.Label{ label = S("Agility: ") .. tostring(ctx.form.agility) },
+                gui.Label{ label = S("Constitution: ") .. tostring(ctx.form.constitution) },
+                gui.Label{ label = S("Charisma: ") .. tostring(ctx.form.charisma) },
             },
+            gui.Box{ w = 1, color = "#0000" },
+            image_frame,
             gui.Box{ expand = true, color = "#0000" },
         },
     }
